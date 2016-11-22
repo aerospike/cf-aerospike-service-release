@@ -1,0 +1,25 @@
+#!/bin/bash
+set +e -x
+
+<%
+  def discover_aerospike_servers
+    aerospike_servers_addr = " "
+    if_link("aerospike-server") do |aerospike_servers|
+       aerospike_servers.instances.map do |instance|
+         aerospike_servers_addr = aerospike_servers_addr + instance.address + " "
+       end
+    end
+    aerospike_servers_addr.strip.gsub(' ', ',')
+  end
+  aerospike_servers = discover_aerospike_servers
+%>
+
+<%
+if_link("aerospike-server") do |aerospike_servers|
+   aerospike_servers.instances.map do |instance| 
+%>
+    mesh-seed-address-port <%="#{instance.address}"%>
+<%
+   end
+end
+%>

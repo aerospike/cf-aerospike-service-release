@@ -1,0 +1,109 @@
+name: aerospike-service
+
+director_uuid: 93c01d2d-a2a5-49d8-8d02-389fd223a9cf
+
+releases:
+- {name: aerospike-service-release, version: latest}
+
+stemcells:
+- alias: trusty
+  os: ubuntu-trusty
+  version: 3262.2
+
+instance_groups:
+- name: server
+  instances: 1
+  vm_type: container
+  persistent_disk_type: ten
+  azs: [lite]
+  networks:
+    - name: aerospike
+  stemcell: trusty
+  jobs:
+  - name: aerospike-server
+    templates:
+    - {name: aerospike-server, release: aerospike-service-release}
+    stemcell: trusty
+    networks:
+    - name: aerospike
+    properties:
+      cf:
+        admin_password: SHojk-oFtuoERVbOyy9lKLiO9ETRmpwN
+        admin_username: system_services
+        api_url: https://api.run-02.haas-26.pez.pivotal.io
+        app_domains:
+        - cfapps-02.haas-26.pez.pivotal.io
+        disable_ssl_cert_verification: true
+        domain: run-02.haas-26.pez.pivotal.io
+        nats:
+          host: 10.65.179.13
+          password: dO0UWgwmyBjsjWP_ppeIryl4Y83dxfp6
+          port: 4222
+          username: nats
+      network: aerospike
+      service:
+        amc_password: Pm8Q6kiN1FiSupgDZwYi
+        amc_user: 0P1qWOG6N4wj
+        db_password: eDLD9CggOnoPMM9nydsn
+        db_user: admin
+        license_type: enterprise
+      service_network:
+        fabric_port: 3001
+        heartbeat_interval: 150
+        heartbeat_port: 3002
+        heartbeat_timeout: 10
+        info_port: 3003
+        service_port: 3000
+      namespace_data_in_memory: "false"
+      namespace_storage_type: device
+      namespace_default_ttl: 0S
+      namespace_name: cf_session
+      namespace_replication_factor: "3"
+      namespace_size: 100M
+      namespace_filesize: 200M
+      type: small
+- name: amc
+  instances: 1
+  vm_type: container
+  persistent_disk_type: ten
+  azs: [lite]
+  networks: 
+    - name: aerospike
+  stemcell: trusty
+  jobs:
+  - name: aerospike-amc
+    templates:
+    - {name: aerospike-amc, release: aerospike-service-release}
+    stemcell: trusty
+    networks:
+    - name: aerospike
+    properties:
+      amc_address: aerospike-amc-service-instance_8c897195-ac01-4d26-80a7-ef12b84eec21
+      amc_listen_port: 8081
+      cf:
+        admin_password: SHojk-oFtuoERVbOyy9lKLiO9ETRmpwN
+        admin_username: system_services
+        api_url: https://api.run-02.haas-26.pez.pivotal.io
+        app_domains:
+        - cfapps-02.haas-26.pez.pivotal.io
+        disable_ssl_cert_verification: true
+        domain: run-02.haas-26.pez.pivotal.io
+        nats:
+          host: 10.65.179.13
+          password: dO0UWgwmyBjsjWP_ppeIryl4Y83dxfp6
+          port: 4222
+          username: nats
+      network: aerospike
+      service:
+        amc_password: Pm8Q6kiN1FiSupgDZwYi
+        amc_user: 0P1qWOG6N4wj
+        db_password: eDLD9CggOnoPMM9nydsn
+        db_user: admin
+      type: small
+
+update:
+  canaries: 1
+  max_in_flight: 1
+  canary_watch_time: 5000-300000
+  update_watch_time: 5000-300000
+

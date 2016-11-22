@@ -1,0 +1,212 @@
+#!/bin/bash
+set -ax
+
+CONFIG_USER=false
+
+SCRIPT_DIR=$(dirname $0)
+. $SCRIPT_DIR/init.sh
+
+function pid_is_running() {
+  declare pid="$1"
+  ps -p "${pid}" >/dev/null 2>&1
+}
+
+# wait_pid_death
+#
+# @param pid
+# @param timeout
+#
+# Watch a :pid: for :timeout: seconds, waiting for it to die.
+# If it dies before :timeout:, exit 0. If not, exit 1.
+#
+# Note that this should be run in a subshell, so that the current
+# shell does not exit.
+#
+function wait_pid_death() {
+  declare pid="$1" timeout="$2"
+
+  local countdown
+  countdown=$(( timeout * 10 ))
+
+  while true; do
+    if ! pid_is_running "${pid}"; then
+      return 0
+    fi
+
+    if [ ${countdown} -le 0 ]; then
+      return 1
+    fi
+
+    countdown=$(( countdown - 1 ))
+    sleep 0.1
+  done
+}
+
+# kill_and_wait
+#
+# @param pidfile
+# @param timeout [default 25s]
+#
+# For a pid found in :pidfile:, send a `kill -6`, then wait for :timeout: seconds to
+# see if it dies on its own. If not, send it a `kill -9`. If the process does die,
+# exit 0 and remove the :pidfile:. If after all of this, the process does not actually
+# die, exit 1.
+#
+# Note:
+# Monit default timeout for start/stop is 30s
+# Append 'with timeout {n} seconds' to monit start/stop program configs
+#
+function kill_and_wait() {
+  declare pidfile="$1" timeout="${2:-25}" sigkill_on_timeout="${3:-1}"
+
+  if [ ! -f "${pidfile}" ]; then
+    echo "Pidfile ${pidfile} doesn't exist"
+    return 0
+  fi
+
+  local pid
+  pid=$(head -1 "${pidfile}")
+
+  if [ -z "${pid}" ]; then
+    echo "Unable to get pid from ${pidfile}"
+    return 1
+  fi
+
+  if ! pid_is_running "${pid}"; then
+    echo "Process ${pid} is not running"
+    rm -f "${pidfile}"
+    return 0
+  fi
+
+  echo "Killing ${pidfile}: ${pid} "
+  kill "${pid}"
+
+  if ! wait_pid_death "${pid}" "${timeout}"; then
+    if [ "${sigkill_on_timeout}" = "1" ]; then
+      echo "Kill timed out, using kill -9 on ${pid}"
+      kill -9 "${pid}"
+      sleep 0.5
+    fi
+  fi
+
+  if pid_is_running "${pid}"; then
+    echo "Timed Out"
+    return 1
+  else
+    echo "Stopped"
+    rm -f "${pidfile}"
+  fi
+}
+
+function wait_migrations() {
+  retries=20
+  while [ true ] ; do
+    log_debug "CHECKING FOR MIGRATIONS"
+    if [ "$AEROSPIKE_LICENSE" = "enterprise" ] ; then
+      db_info=$(asinfo -Uadmin -P${AEROSPIKE_PASSWORD} -v "statistics")
+    else
+      db_info=$(asinfo -v "statistics")
+    fi
+
+    arrInfo=(${db_info//;/ })
+    found_param=false
+    for var in "${arrInfo[@]}"
+    do
+      arrNameValue=(${var//=/ })
+      if [ ${arrNameValue[0]} = "migrate_partitions_remaining" ] ; then
+        found_param=true
+        if [ ${arrNameValue[1]} = "0" ] ; then
+          log_debug "MIGRATIONS COMPLETE"
+          return 0
+        else
+          log_debug "PARTITIONS REMAINING: ${arrNameValue[1]}"
+          sleep 5s
+        fi
+      fi
+    done
+    if [ "$found_param" = false ] ; then
+      log_debug "COULD NOT FIND migrate_partitions_remaining IN ASINFO VALUES"
+      if [ $retries -gt 0 ] ; then
+        sleep 5s
+        retries=$(( $retries - 1 ))
+      else
+        return 0
+      fi
+    fi
+  done
+}
+
+function start_aerospike() {
+	chown -R vcap:vcap $RUN_DIR $LOG_DIR
+	set_shmall
+	set_shmmax
+	ulimit -n 100000
+
+	pushd $SERVER_DIR
+		 ./usr/bin/asd --config-file $CONFIG_DIR/aerospike.conf
+	popd
+
+  sleep 10s
+
+	log_debug "LICENSE ${AEROSPIKE_LICENSE} CONFIG ${CONFIG_USER}"
+  # only configure the admin password on the initial VM bringup
+  if [ "$CONFIG_USER" = true ] && [ "$AEROSPIKE_LICENSE" = "enterprise" ] ; then
+    sleep 5s
+    aql -Uadmin -Padmin -c "grant role sys-admin to admin"
+    aql -Uadmin -Padmin -c "grant role read-write-udf to admin"
+		aql -Uadmin -Padmin -c "set password ${AEROSPIKE_PASSWORD} for ${AEROSPIKE_USER}"
+	fi
+
+  # wait for migrations to finish
+  wait_migrations
+
+  # let monit know we're up and running
+  cp $PIDFILE $MONIT_PIDFILE
+}
+
+if [ ! -d "${DATA_DIR}" ] ; then
+  # virgin VM. Need to configure it
+	CONFIG_USER=true
+	mkdir -p ${DATA_DIR}
+	mkdir -p ${STORE_DIR}
+	chown -R vcap:vcap ${STORE_DIR}
+	useradd -d ${DATA_DIR} aerospike
+
+	mkdir -p ${STORE_DIR}/{smd,{sys,usr}/udf/lua}
+
+	#install server
+	cp $PACKAGE_DIR/* $DATA_DIR
+
+	pushd ${DATA_DIR}
+		tar -xvf aerospike-server-*.tgz 
+		pushd aerospike-server-*
+			dpkg -x aerospike-server-*.deb $SERVER_DIR
+			dpkg -i aerospike-tools-*.deb
+		popd
+		cp -pr ./aerospike-server/opt/aerospike/sys/udf/lua/* ${STORE_DIR}/sys/udf/lua
+	popd
+
+  dpkg -i /var/vcap/packages/python/deb_packages/python-bcrypt*.deb
+
+  chown -R vcap:vcap ${STORE_DIR}/{smd,{sys,usr}/udf/lua}
+fi
+
+case $1 in
+
+  start)
+	log_debug "STARTING SERVICE..."
+	start_aerospike
+	log_debug "FINISHED STARTING SERVICE."
+    ;;
+
+  stop)
+	log_debug "STOPPING SERVICE..."
+	kill_and_wait $PIDFILE
+	log_debug "FINISHED STOPPING SERVICE."
+    ;;
+
+  *)
+	echo "Usage: ctl {start|stop}" ;;
+
+esac
+

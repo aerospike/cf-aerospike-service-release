@@ -1,0 +1,96 @@
+#!/bin/bash
+set +e -x
+
+<%
+  def discover_external_ip
+    networks = spec.networks.marshal_dump
+    _, network = networks.find do |_name, network_spec|
+      network_spec.default
+    end
+    if !network
+      _, network = networks.first
+    end
+    if !network
+      raise "Could not determine IP via network spec: #{networks}"
+    end
+    network.ip
+  end
+  my_ip = discover_external_ip
+%>
+
+<%
+  def discover_aerospike_servers
+    aerospike_servers_addr = " "
+    if_link("aerospike-server") do |aerospike_servers|
+       aerospike_servers.instances.map do |instance|
+         aerospike_servers_addr = aerospike_servers_addr + instance.address + " "
+       end
+    end
+    aerospike_servers_addr.strip.gsub(' ', ',')
+  end
+  aerospike_servers = discover_aerospike_servers
+%>
+
+<%
+  def discover_first_aerospike_server
+    aerospike_server_addr = ""
+    if_link("aerospike-server") do |aerospike_servers|
+      aerospike_server_addr = aerospike_servers.instances[0].address
+    end
+    aerospike_server_addr
+  end
+  aerospike_first_server = discover_first_aerospike_server
+%>
+
+export STORE_DIR=<%= properties.store.dir %>
+export DATA_DIR=<%= properties.data.dir %>
+export PACKAGE_DIR=<%= properties.package.dir %>
+export SERVER_DIR=<%= properties.server.dir %>
+export CONFIG_DIR=<%= properties.config.dir %>
+export RUN_DIR=<%= properties.run.dir %>
+export LOG_DIR=<%= properties.log.dir %>
+
+# Not relying on network name to arrive at hostip
+# Set the ip to HOSTNAME to avoid listener getting bound to some internal only hostname
+export HOSTNAME=<%="#{my_ip}"%>
+export AEROSPIKE_DB_HOST=<%="#{my_ip}"%>
+export AEROSPIKE_SERVER_LIST="<%=aerospike_servers%>"
+export AEROSPIKE_USER=<%=properties.service.db_user %>
+export AEROSPIKE_PASSWORD=<%=properties.service.db_password %>
+export AEROSPIKE_LICENSE=<%=properties.service.license_type %>
+
+export PIDFILE=${RUN_DIR}/aerospike-server.pid
+export MONIT_PIDFILE=${RUN_DIR}/aerospike-monit.pid
+
+mkdir -p $RUN_DIR $LOG_DIR
+chown -R vcap:vcap $RUN_DIR $LOG_DIR
+
+export DEBUG_LOG=$LOG_DIR/aerospike_monit.log
+
+touch $DEBUG_LOG
+chmod -R 755 /var/vcap/sys
+chmod 777 $DEBUG_LOG
+
+function log_debug() {
+  echo `date` $1 >> $DEBUG_LOG
+}
+
+function set_shmall() {
+  mem=`/sbin/sysctl -n kernel.shmall`
+  min=4294967296
+  if [ $mem -lt $min ]
+  then
+    log_debug "kernel.shmall too low, setting to 4G pages"
+    /sbin/sysctl -w kernel.shmall=$min
+  fi
+}
+
+function set_shmmax() {
+  mem=`/sbin/sysctl -n kernel.shmmax`
+  min=1073741824
+  if [ $mem -lt $min ]
+  then
+    log_debug "kernel.shmmax too low, setting to 1GB"
+    /sbin/sysctl -w kernel.shmmax=$min
+  fi
+}

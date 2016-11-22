@@ -1,0 +1,7 @@
+check process aerospike-server
+  with pidfile /var/vcap/sys/run/aerospike-server/aerospike-monit.pid
+  start program "/var/vcap/jobs/aerospike-server/bin/ctl start"
+ 	with timeout 1200 seconds
+  stop program "/var/vcap/jobs/aerospike-server/bin/ctl stop"
+ 	with timeout 120 seconds
+  group vcap

@@ -1,0 +1,9 @@
+bind = "0.0.0.0:8081"
+pidfile = "<%= properties.run.dir %>/aerospike-amc.pid"
+loglevel = "info"
+errorlog = "<%= properties.log.dir %>/aerospike_amc.log"
+workers = 1
+proc_name = "amc"
+chdir = "/opt/amc/server"
+timeout = 150
+worker_class = "eventlet"

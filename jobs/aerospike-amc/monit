@@ -1,0 +1,11 @@
+check process route-registrar
+  with pidfile /var/vcap/sys/run/aerospike-amc/route-registrar.pid
+  start program "/var/vcap/jobs/aerospike-amc/bin/route-registrar_ctl start" with timeout 10 seconds
+  stop program "/var/vcap/jobs/aerospike-amc/bin/route-registrar_ctl stop" with timeout 10 seconds
+  group vcap
+
+check process aerospike-amc
+  with pidfile /var/vcap/sys/run/aerospike-amc/aerospike-amc.pid
+  start program "/var/vcap/jobs/aerospike-amc/bin/ctl start" with timeout 120 seconds
+  stop program "/var/vcap/jobs/aerospike-amc/bin/ctl stop" with timeout 120 seconds
+  group vcap

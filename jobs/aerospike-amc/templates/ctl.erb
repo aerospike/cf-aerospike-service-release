@@ -1,0 +1,58 @@
+#!/bin/bash
+set -e # exit immediately if a simple command exits with a non-zero status
+set -u # report the usage of uninitialized variables
+
+RUN_DIR=/var/vcap/sys/run/aerospike-amc
+LOG_DIR=/var/vcap/sys/log/aerospike-amc
+STORE_DIR=/var/vcap/store/aerospike-amc
+CFG_DIR=/var/vcap/jobs/aerospike-amc/config
+PKG_DIR=/var/vcap/packages/aerospike-amc
+BIN_DIR=${PKG_DIR}/opt/amc/amc/bin
+SVR_DIR=${PKG_DIR}/opt/amc/amc/server
+PIDFILE=${RUN_DIR}/aerospike-amc.pid
+
+source /var/vcap/packages/common/utils.sh
+
+case $1 in
+
+  start)
+  	pid_guard ${PIDFILE} "aerospike-amc"
+
+    mkdir -p ${RUN_DIR} ${LOG_DIR} ${STORE_DIR}
+    chown -R vcap:vcap ${RUN_DIR} ${LOG_DIR} ${STORE_DIR}
+
+    mkdir -p /etc/amc/config
+    mkdir -p /opt/amc/server
+    touch /opt/amc/enterprise_flag
+    chown vcap:vcap /opt/amc/enterprise_flag
+
+    amc_version=$(dpkg --info ${PKG_DIR}/*.deb | grep 'Version:')
+    echo $amc_version | cut -d ' ' -f 2 > /opt/amc/amc_version
+    chown vcap:vcap /opt/amc/amc_version
+
+    dpkg -i /var/vcap/packages/python/deb_packages/python-crypto*.deb
+    dpkg -i /var/vcap/packages/python/deb_packages/python-bcrypt*.deb
+
+    chmod +x ${BIN_DIR}/gunicorn
+    export PYTHONPATH=${SVR_DIR}/:${SVR_DIR}/site-packages/
+
+    exec ${BIN_DIR}/gunicorn \
+      --daemon \
+      --config=${CFG_DIR}/amc.conf \
+      flaskapp:app \
+      >>  ${LOG_DIR}/aerospike_amc.stdout.log \
+      2>> ${LOG_DIR}/aerospike_amc.stderr.log
+
+    ;;
+
+  stop)
+    kill_and_wait ${PIDFILE}
+    
+	;;
+
+  *)
+    echo "Usage: aerospike_amc_ctl {start|stop}" 
+    ;;
+esac
+exit 0
+

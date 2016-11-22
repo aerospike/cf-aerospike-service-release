@@ -1,0 +1,41 @@
+---
+name: aerospike-amc
+templates:
+  route-registrar_ctl: bin/route-registrar_ctl
+  registrar_settings.yml.erb: config/registrar_settings.yml
+  ctl.erb: bin/ctl
+  configuration.erb: config/amc.conf
+  
+packages:
+- common
+- route-registrar
+- aerospike-amc
+- python
+
+consumes:
+- name: aerospike-server
+  type: aerospike-server
+
+properties:
+  cf.app_domains:
+    description: Domain shared by the UAA and CF API eg 'bosh-lite.com'
+  cf.nats.host:
+    description: Hostname/IP of NATS
+  cf.nats.port:
+    description: Port that NATS listens on
+  cf.nats.username:
+    description: The user to use when authenticating with NATS
+  cf.nats.password:
+    description: The password to use when authenticating with NATS
+  amc_listen_port:
+    description: The port for AMC
+    default: 8081
+  amc_address:
+    description: The address of the AMC server
+
+  log.dir:
+    description: Log dir on VM
+    default: /var/vcap/sys/log/aerospike-amc
+  run.dir:
+    description: Run dir on VM
+    default: /var/vcap/sys/run/aerospike-amc

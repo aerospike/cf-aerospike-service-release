@@ -1,0 +1,116 @@
+---
+name: aerospike-server
+templates:
+ init.sh.erb: bin/init.sh
+ ctl.erb: bin/ctl
+ configuration.erb: config/aerospike.conf
+
+packages:
+- aerospike-server
+- python
+
+provides:
+- name: aerospike-server
+  type: aerospike-server
+
+  properties: 
+  - service_network.service_port
+  - service_network.fabric_port
+
+consumes:
+- name: aerospike-server
+  type: aerospike-server
+
+properties:
+  namespace_data_in_memory: 
+    description: Keep a copy of the persistent namespace in memory
+    default: false
+  namespace_storage_type:
+    default: device
+  namespace_default_ttl: 
+    default: 0S
+  namespace_name:
+    default: cf_persistent
+  namespace_replication_factor:
+    default: 2
+  namespace_size: 
+    default: 2G
+  namespace_filesize: 
+    default: 4G
+
+  store.dir:
+    description: Store dir on VM
+    default: /var/vcap/store/aerospike-server
+  data.dir:
+    description: Data dir on VM
+    default: /var/vcap/data/aerospike
+  server.dir:
+    description: Server dir on VM
+    default: /var/vcap/data/aerospike/aerospike-server
+  config.dir:
+    description: Config dir on VM
+    default: /var/vcap/jobs/aerospike-server/config
+  package.dir:
+    description: Package dir on VM
+    default: /var/vcap/packages/aerospike-server
+  run.dir:
+    description: Run dir on VM
+    default: /var/vcap/sys/run/aerospike-server
+  log.dir:
+    description: Log dir on VM
+    default: /var/vcap/sys/log/aerospike-server
+   
+  service.paxos_single_replica_limit:
+    default: 1
+    description: "If the cluster size is less than or equal to this value, only one copy of the data (no replicas) will be kept in the cluster"
+  service.service_threads:
+    default: 4
+    description: "Number of threads receiving client requests on the network interface"
+  service.license_type:
+    default: enterprise
+    description: "License type of server (community or enterprise)"
+  service.db_user:
+    default: admin
+    description: "User to use for administration of the Aerospike DB"
+  service.db_password:
+    description: "Password to use for administration of the Aerospike DB"
+    default: admin
+  service.transaction_queues:
+    default: 4
+    description: "Number of transaction queues managing client requests. Service threads will dispatch transactions into those queues (round robin)"
+  service.transaction_threads_per_queue:
+    default: 4
+    description: "Number of threads per transaction queue. Those threads will consume the requests from the transaction queues"
+  service.proto_fd_max:
+    default: 15000
+    description: "Maximum number of open file descriptors opened on behalf of client connections"
+  service.job_ips:
+    description: "Listen address(es) for the aerospike cluster instances"
+  service.my_addr:
+    description: "IP address of this instance"
+  service.service_addr:
+    description: "IPs of all hosts in cluster"
+  service.namespaces:
+    description: "Namespaces for this database"
+
+  service.my_ip_addr:
+    description: "My IP address"
+
+  service_network.service_port:
+    default: 3000
+    description: "TCP port aerospike server listen on"
+  service_network.fabric_port:
+    default: 3001
+    description: "TCP port for inter-node communication within the cluster"
+  service_network.info_port:
+    default: 3003
+    description: "TCP port used for info management"
+  service_network.heartbeat_port:
+    default: 3002
+    description: "TCP port used for cluster state communication"
+  service_network.heartbeat_interval:
+    default: 150
+    description: "Interval in milliseconds in which heartbeats are sent"
+  service_network.heartbeat_timeout:
+    default: 10
+    description: "Number of missing heartbeats after which the remote node will be declared dead"

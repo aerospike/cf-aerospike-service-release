@@ -1,0 +1,10 @@
+---
+name: service-metrics-adapter
+templates:
+ collect-service-metrics.sh.erb: bin/collect-service-metrics.sh
+
+consumes:
+- name: aerospike-server
+  type: aerospike-server
+  
+packages:

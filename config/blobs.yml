@@ -1,0 +1,17 @@
+---
+amc/aerospike-amc-enterprise-3.6.13.all.x86_64.deb:
+  object_id: a5a1cac7-28f9-46f1-ae7b-04b099dd216d
+  sha: cde3228e0f77f800e78f9ea1840cd47279b98796
+  size: 2053884
+golang/go1.7.linux-amd64.tar.gz:
+  object_id: 14369966-94ac-4f24-984f-9cc8eb7317ea
+  sha: a744e29da97fc3aadad1ee0d7d89b0d899645e50
+  size: 81573766
+python/deb_packages.tgz:
+  object_id: 7511e0c5-4aa7-436c-81b9-d78c2d588145
+  sha: 1715e42cf78407d2d94b4f77d596e19738aa242f
+  size: 23973460
+python/Python-2.7.10.tgz:
+  object_id: 0ac59a27-eabe-4000-b4af-1760d914f724
+  sha: 49089f1f6ab445dc8ace97beeb276095c4c8039b
+  size: 16768806

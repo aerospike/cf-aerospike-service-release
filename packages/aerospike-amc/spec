@@ -1,0 +1,8 @@
+---
+name: aerospike-amc
+
+dependencies:
+  - python
+
+files:
+  - amc/aerospike-amc-enterprise-3.6.13.all.x86_64.deb
