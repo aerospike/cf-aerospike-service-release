@@ -5,4 +5,4 @@ dependencies:
   - python
 
 files:
-  - amc/aerospike-amc-enterprise-3.6.13.all.x86_64.deb
+  - amc/aerospike-amc-enterprise-*.all.x86_64.deb

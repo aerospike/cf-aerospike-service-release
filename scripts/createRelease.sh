@@ -12,7 +12,6 @@ ROOT_DIR=$SCRIPT_DIR/..
 BLOBS_DIR=$ROOT_DIR/blobs
 SERVER_PACKAGE_DIR=$ROOT_DIR/packages/aerospike-server
 AMC_PACKAGE_DIR=$ROOT_DIR/packages/aerospike-amc
-TEMPLATE_DIR=$ROOT_DIR/templates
 
 if [ "$#" -gt 1 ]; then
   echo "Usage: [<version>]"
@@ -31,14 +30,6 @@ if [ -z "$SERVER_NAME" ]; then
   echo "Download the Aerospike Enterprise tgz file and copy it into the blobs directory."
   exit -1
 fi
-
-ruby $SCRIPT_DIR/generatePackage.rb $SERVER_NAME $TEMPLATE_DIR/server_spec.erb > $SERVER_PACKAGE_DIR/spec
-
-pushd $BLOBS_DIR
-  AMC_NAME=`find amc/* -print`
-popd
-
-ruby $SCRIPT_DIR/generatePackage.rb $AMC_NAME $TEMPLATE_DIR/amc_spec.erb > $AMC_PACKAGE_DIR/spec
 
 # auto-increment version number
 source $SCRIPT_DIR/version
