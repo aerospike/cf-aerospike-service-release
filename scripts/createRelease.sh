@@ -21,7 +21,7 @@ if [ "$#" -gt 1 ]; then
 fi
 
 pushd $BLOBS_DIR
-  SERVER_NAME=`find *.tgz -type f -print`
+  SERVER_NAME=`find -H *.tgz -type f -print`
 popd
 
 if [ -z "$SERVER_NAME" ]; then
