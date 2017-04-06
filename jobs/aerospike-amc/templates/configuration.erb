@@ -1,9 +1,66 @@
+<%
+  def discover_first_aerospike_server
+    aerospike_server_addr = ""
+    if_link("aerospike-server") do |aerospike_servers|
+      aerospike_server_addr = aerospike_servers.instances[0].address
+    end
+    aerospike_server_addr
+  end
+  aerospike_first_server = discover_first_aerospike_server
+%>
+
+[AMC]
+update_interval = 5
+
 bind = "0.0.0.0:8081"
-pidfile = "<%= properties.run.dir %>/aerospike-amc.pid"
+pidfile = "/var/run/amc.pid"
 loglevel = "info"
 errorlog = "<%= properties.log.dir %>/aerospike_amc.log"
-workers = 1
-proc_name = "amc"
-chdir = "/opt/amc/server"
+#proc_name = "amc"
+chdir = "/opt/amc/"
+static_dir = "/opt/amc/static"
 timeout = 150
-worker_class = "eventlet"
+
+# when you start monitoring a cluster, it will be polled activaly in the background.
+# this setting determines how long will that clustered be kept after it is not polled anymore.
+# This setting will not affect the clusters in the [amc.clusters] section.
+# values <= 0 mean never remove.
+cluster_inactive_before_removal = 1800
+
+database = "/opt/amc/amc.db"
+
+# The following clusters will be automatically monitored on AMC start
+[amc.clusters]
+#
+[amc.clusters.db1]
+host = "<%= aerospike_first_server%>"
+port = <%= link('aerospike-server').p('service_network.service_port') %>
+user = "<%= link('aerospike-server').p('service.db_user') %>"
+password = "<%= link('aerospike-server').p('service.db_password') %>"
+
+[mailer]
+template_path = "/opt/amc/mailer/templates"
+#host = "smtp.<host>"
+#port = 587
+#user = ""
+#password = ""
+#send_to = ["<email>", "<email>"]
+
+[basic_auth]
+# you can also set $AMC_AUTH_USER env variable
+#user = "<user>"
+# you can also set $AMC_AUTH_PASSWORD env variable
+#password = "<pass>"
+
+[TLS]
+
+# name of cert files to add to the pool for TLS connections
+# All entries should be a string
+# System certs are automatically added
+server_cert_pool = [
+# "<path>",
+# "<path>",
+]
+
+[tls.client_certs]
+

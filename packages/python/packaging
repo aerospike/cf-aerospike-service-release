@@ -1,9 +1,0 @@
-#!/bin/bash
-set -e # exit immediately if a simple command exits with a non-zero status
-
-mkdir -p ${BOSH_INSTALL_TARGET}
-cp python/*.tgz ${BOSH_INSTALL_TARGET}
-cd ${BOSH_INSTALL_TARGET}
-tar xzvf ${BOSH_INSTALL_TARGET}/*.tgz
-cd deb_packages
-dpkg -i *.deb

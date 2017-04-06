@@ -4,13 +4,3 @@ set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
 
 cp amc/*.deb ${BOSH_INSTALL_TARGET}
-
-pushd ${BOSH_INSTALL_TARGET}
-  dpkg -x aerospike-amc-*.deb .
-  cd opt/
-  tar -xzf amc.tar.gz
-  cd amc/amc/server/setups
-  cp greenlet/greenlet-deb.so ../site-packages/greenlet.so
-  cp setproctitle/setproctitle-deb.so ../site-packages/setproctitle.so
-popd
-

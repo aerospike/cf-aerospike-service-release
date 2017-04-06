@@ -5,7 +5,7 @@ check process route-registrar
   group vcap
 
 check process aerospike-amc
-  with pidfile /var/vcap/sys/run/aerospike-amc/aerospike-amc.pid
+  with pidfile /var/run/amc.pid
   start program "/var/vcap/jobs/aerospike-amc/bin/ctl start" with timeout 120 seconds
   stop program "/var/vcap/jobs/aerospike-amc/bin/ctl stop" with timeout 120 seconds
   group vcap

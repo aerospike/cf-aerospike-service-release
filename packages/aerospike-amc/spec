@@ -2,7 +2,6 @@
 name: aerospike-amc
 
 dependencies:
-  - python
 
 files:
   - amc/aerospike-amc-enterprise-*_amd64.deb

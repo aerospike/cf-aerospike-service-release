@@ -18,6 +18,9 @@ case $1 in
   start)
   	pid_guard ${PIDFILE} "aerospike-amc"
 
+    dpkg -i ${PKG_DIR}/aerospike-amc-*.deb
+    cp ${CFG_DIR}/amc.conf /etc/amc/amc.conf
+    
     mkdir -p ${RUN_DIR} ${LOG_DIR} ${STORE_DIR}
     chown -R vcap:vcap ${RUN_DIR} ${LOG_DIR} ${STORE_DIR}
 
@@ -30,18 +33,9 @@ case $1 in
     echo $amc_version | cut -d ' ' -f 2 > /opt/amc/amc_version
     chown vcap:vcap /opt/amc/amc_version
 
-    dpkg -i /var/vcap/packages/python/deb_packages/python-crypto*.deb
-    dpkg -i /var/vcap/packages/python/deb_packages/python-bcrypt*.deb
-
-    chmod +x ${BIN_DIR}/gunicorn
     export PYTHONPATH=${SVR_DIR}/:${SVR_DIR}/site-packages/
-
-    exec ${BIN_DIR}/gunicorn \
-      --daemon \
-      --config=${CFG_DIR}/amc.conf \
-      flaskapp:app \
-      >>  ${LOG_DIR}/aerospike_amc.stdout.log \
-      2>> ${LOG_DIR}/aerospike_amc.stderr.log
+    
+    /etc/init.d/amc start
 
     ;;
 

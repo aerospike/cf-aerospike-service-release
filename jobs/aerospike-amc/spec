@@ -10,7 +10,6 @@ packages:
 - common
 - route-registrar
 - aerospike-amc
-- python
 
 consumes:
 - name: aerospike-server
