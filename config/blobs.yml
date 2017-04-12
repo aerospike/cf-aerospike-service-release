@@ -3,19 +3,11 @@ golang/go1.7.linux-amd64.tar.gz:
   object_id: 14369966-94ac-4f24-984f-9cc8eb7317ea
   sha: a744e29da97fc3aadad1ee0d7d89b0d899645e50
   size: 81573766
-python/deb_packages.tgz:
-  object_id: 7511e0c5-4aa7-436c-81b9-d78c2d588145
-  sha: 1715e42cf78407d2d94b4f77d596e19738aa242f
-  size: 23973460
-python/Python-2.7.10.tgz:
-  object_id: 0ac59a27-eabe-4000-b4af-1760d914f724
-  sha: 49089f1f6ab445dc8ace97beeb276095c4c8039b
-  size: 16768806
-aerospike-server-enterprise-3.12.0-ubuntu14.04.tgz:
-  object_id: a600731c-ab07-4b27-9c3b-7e1be158af73
-  sha: f0f0d1dce74e37d14ed10e8efc21575b3601b8a2
-  size: 7857500
 amc/aerospike-amc-enterprise-4.0.11_amd64.deb:
   object_id: cdc3fccc-054d-48ed-a710-43943bfd5c41
   sha: db5527573fe67749eec2b14d854793acd020a286
   size: 7658926
+aerospike-server-enterprise-3.12.1-ubuntu14.04.tgz:
+  object_id: 0a445816-0384-410e-b11b-7468bf0678eb
+  sha: 6ac2b3f909d046c3f60da4947b4349774c744729
+  size: 7883006
