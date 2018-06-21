@@ -51,13 +51,13 @@ security {
 
 network {
     service {
-        address any
+        address <%= spec.address %>
         port <%= p("service_network.service_port") %>
     }
 
     heartbeat {
         mode mesh
-        address <%= my_ip%>
+        address <%= spec.address %>
         port <%= p("service_network.heartbeat_port") %>
         <%
         if_link("aerospike-server") do |aerospike_servers|

@@ -1,18 +1,19 @@
 #!/bin/bash
 set -e # exit immediately if a simple command exits with a non-zero status
 set -u # report the usage of uninitialized variables
+set -x
 
 RUN_DIR=/var/vcap/sys/run/aerospike-amc
 LOG_DIR=/var/vcap/sys/log/aerospike-amc
 STORE_DIR=/var/vcap/store/aerospike-amc
 CFG_DIR=/var/vcap/jobs/aerospike-amc/config
 PKG_DIR=/var/vcap/packages/aerospike-amc
-BIN_DIR=${PKG_DIR}/opt/amc/amc/bin
+
 SVR_DIR=${PKG_DIR}/opt/amc/amc/server
-PIDFILE=${RUN_DIR}/aerospike-amc.pid
+STATIC_DIR=${PKG_DIR}/opt/amc/amc/static
+PIDFILE=/var/run/amc.pid
 
 source /var/vcap/packages/common/utils.sh
-
 case $1 in
 
   start)
@@ -33,7 +34,6 @@ case $1 in
     echo $amc_version | cut -d ' ' -f 2 > /opt/amc/amc_version
     chown vcap:vcap /opt/amc/amc_version
 
-    export PYTHONPATH=${SVR_DIR}/:${SVR_DIR}/site-packages/
     
     /etc/init.d/amc start
 
@@ -41,7 +41,6 @@ case $1 in
 
   stop)
     kill_and_wait ${PIDFILE}
-    
 	;;
 
   *)
