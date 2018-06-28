@@ -30,6 +30,7 @@ service {
     transaction-threads-per-queue <%= p("service.transaction_threads_per_queue") %>
     proto-fd-max <%= p("service.proto_fd_max") %>
     work-directory <%= properties.store.dir %>
+    feature-key-file /var/vcap/jobs/aerospike-server/config/features.conf
 }
 
 logging {
