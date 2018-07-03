@@ -54,5 +54,5 @@ rm -rf .dev_releases *releases .*builds  ~/.bosh/cache
 # bosh -n create release --name $RELEASE_NAME \
 #      --version $SERVICE_RELEASE_VERSION --force --with-tarball
 
-bosh -n create-release --name $RELEASE_NAME --version $SERVICE_RELEASE_VERSION --tarball $RELEASE_TAR_NAME --force
+bosh -n create-release --name $RELEASE_NAME --version $SERVICE_RELEASE_VERSION --tarball $RELEASE_TAR_NAME --force --sha2
 cp $RELEASE_TAR_NAME dev_releases/$RELEASE_NAME/
