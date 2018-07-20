@@ -1,6 +1,6 @@
-aerospike-server-enterprise-4.2.0.2-ubuntu14.04.tgz:
-  size: 14827381
-  sha: d92af25009fec33751edf656d1154f9ec8c6bbd8
+aerospike-server-enterprise-4.2.0.4-ubuntu14.04.tgz:
+  size: 14824129
+  sha: 800e1c0e6551b1cb45fb2989757fae1db45dec36
 amc/aerospike-amc-enterprise-4.0.19_amd64.deb:
   size: 7932474
   sha: 7add66b6f009931392e0e2cbc0924ee5b17276a6
