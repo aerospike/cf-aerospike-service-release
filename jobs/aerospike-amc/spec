@@ -1,14 +1,11 @@
 ---
 name: aerospike-amc
 templates:
-  route-registrar_ctl: bin/route-registrar_ctl
-  registrar_settings.yml.erb: config/registrar_settings.yml
   ctl.erb: bin/ctl
   configuration.erb: config/amc.conf
   
 packages:
 - common
-- route-registrar
 - aerospike-amc
 
 consumes:
@@ -38,3 +35,15 @@ properties:
   run.dir:
     description: Run dir on VM
     default: /var/vcap/sys/run/aerospike-amc
+
+  service.db_user:
+    description: name of the aerospike-server-user
+  
+  service.db_password:
+    description: password of the aerospike db
+
+  service.amc_user:
+    description: amc user name
+  
+  service.amc_password:
+    description: amc user's password

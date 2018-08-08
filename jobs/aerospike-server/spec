@@ -4,6 +4,7 @@ templates:
  init.sh.erb: bin/init.sh
  ctl.erb: bin/ctl
  configuration.erb: config/aerospike.conf
+ features.erb: config/features.conf
 
 packages:
 - aerospike-server
@@ -38,6 +39,8 @@ properties:
     default: 2G
   namespace_filesize: 
     default: 4G
+  feature_key:
+    description: Feature key for the Enterprise Server
 
   store.dir:
     description: Store dir on VM

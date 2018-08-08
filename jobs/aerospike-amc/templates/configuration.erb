@@ -1,23 +1,30 @@
-<%
-  def discover_first_aerospike_server
-    aerospike_server_addr = ""
-    if_link("aerospike-server") do |aerospike_servers|
-      aerospike_server_addr = aerospike_servers.instances[0].address
-    end
-    aerospike_server_addr
-  end
-  aerospike_first_server = discover_first_aerospike_server
-%>
-
 [AMC]
 update_interval = 5
+#certfile = "<certificate_file_path>"
+#keyfile = "<key_file_path>"
+#Example : File paths should be double quoted.
+#certfile = "/home/amc/self-ssl.crt"
+#keyfile = "/home/amc/self-ssl.key"
+# The following option forces the the server to only use TLS v1.2 as the minimum TLS version.
+#force_tls12=true
+# The following option forces the server to use TLS v1.2 with the following options, resulting in higher level of security:
+##	CurvePreferences will be {CurveP521, CurveP384, CurveP256}
+##	Client will prefer the server cipher suites
+##	CipherSuites will be { TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,	TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,	TLS_RSA_WITH_AES_256_GCM_SHA384, TLS_RSA_WITH_AES_256_CBC_SHA }
+#max_tls_security=true
+
+# Backup will be done on the following machine. If a key is set, that will be used
+# If no key or password is set, SSH Agent will be tried
+# You must put all the string inside double-quotes.
+# Comment out the methods you don't need
+#backup_host_public_key_file =
 
 bind = "0.0.0.0:8081"
-pidfile = "/var/run/amc.pid"
+pidfile = "/var/vcap/sys/run/aerospike-amc/aerospike-amc.pid"
 loglevel = "info"
-errorlog = "<%= properties.log.dir %>/aerospike_amc.log"
-#proc_name = "amc"
-chdir = "/opt/amc/"
+errorlog = "/var/vcap/sys/log/aerospike-amc/aerospike_amc.log"
+proc_name = "amc"
+chdir = "/opt/amc"
 static_dir = "/opt/amc/static"
 timeout = 150
 
@@ -27,16 +34,24 @@ timeout = 150
 # values <= 0 mean never remove.
 cluster_inactive_before_removal = 1800
 
-database = "/opt/amc/amc.db"
+database = "/var/vcap/store/aerospike-amc/amc.db"
 
 # The following clusters will be automatically monitored on AMC start
+# We only have one cluster and we know that a node is located at the first ip address of the aerospike-server link
+<% first_ip = link("aerospike-server").instances.first.address %>
+<% service_port = link("aerospike-server").p("service_network.service_port") %>
+<% db_user = link('aerospike-server').p('service.db_user') %>
+<% db_password = link('aerospike-server').p('service.db_password') %>
+
 [amc.clusters]
-#
-[amc.clusters.db1]
-host = "<%= aerospike_first_server%>"
-port = <%= link('aerospike-server').p('service_network.service_port') %>
-user = "<%= link('aerospike-server').p('service.db_user') %>"
-password = "<%= link('aerospike-server').p('service.db_password') %>"
+
+	[amc.clusters.db1]
+	host = "<%= first_ip %>"
+	port = <%= service_port %>
+	user = "<%= db_user %>"
+	password = "<%= db_password %>"
+	show_in_ui = true
+
 
 [mailer]
 template_path = "/opt/amc/mailer/templates"

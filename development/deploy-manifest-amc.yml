@@ -3,7 +3,8 @@ name: aerospike-service
 director_uuid: 93c01d2d-a2a5-49d8-8d02-389fd223a9cf
 
 releases:
-- {name: aerospike-service-release, version: latest}
+- name: aerospike-service-release
+  version: latest
 
 stemcells:
 - alias: trusty
@@ -12,7 +13,7 @@ stemcells:
 
 instance_groups:
 - name: server
-  instances: 1
+  instances: 3
   vm_type: container
   persistent_disk_type: ten
   azs: [lite]
@@ -73,7 +74,8 @@ instance_groups:
   jobs:
   - name: aerospike-amc
     templates:
-    - {name: aerospike-amc, release: aerospike-service-release}
+    - name: aerospike-amc
+      release: aerospike-service-release
     stemcell: trusty
     networks:
     - name: aerospike
@@ -100,6 +102,8 @@ instance_groups:
         db_password: eDLD9CggOnoPMM9nydsn
         db_user: admin
       type: small
+
+
 
 update:
   canaries: 1
