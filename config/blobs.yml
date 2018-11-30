@@ -1,9 +1,9 @@
-aerospike-server-enterprise-4.2.0.4-ubuntu14.04.tgz:
-  size: 14824129
-  sha: 800e1c0e6551b1cb45fb2989757fae1db45dec36
-amc/aerospike-amc-enterprise-4.0.19_amd64.deb:
-  size: 7932474
-  sha: 7add66b6f009931392e0e2cbc0924ee5b17276a6
+aerospike-server-enterprise-4.4.0.5-ubuntu14.04.tgz:
+  size: 18119761
+  sha: 0f7473556ef07c346218921dde1376e99717cccd
+amc/aerospike-amc-enterprise-4.0.20_amd64.deb:
+  size: 7930740
+  sha: 8e6f5b7c965093ef364a1714577f4bde2122c95b
 golang/go1.7.linux-amd64.tar.gz:
   size: 81573766
   object_id: 14369966-94ac-4f24-984f-9cc8eb7317ea
